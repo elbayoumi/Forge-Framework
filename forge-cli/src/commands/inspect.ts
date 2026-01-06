@@ -11,8 +11,8 @@ export function inspect(target?: string): void {
   } else if (target === 'semantic') {
     inspectSemantic();
   } else {
-    console.error('[forge] Unknown inspect target:', target || '(none)');
-    console.error('[forge] Available targets: ui, semantic');
+    console.error(`[forge] unknown inspect target: ${target || '(none)'}`);
+    console.error('[forge] available targets: ui, semantic');
     process.exit(1);
   }
 }
@@ -23,7 +23,7 @@ export function inspect(target?: string): void {
 function inspectUI(): void {
   const bundle = readSemanticBundle();
   
-  console.log('UI Tree:\n');
+  console.log('[forge] UI tree:\n');
   printUITree(bundle.ui.components, 0);
 }
 
@@ -33,7 +33,7 @@ function inspectUI(): void {
 function inspectSemantic(): void {
   const bundle = readSemanticBundle();
   
-  console.log('Semantic Bundle:\n');
+  console.log('[forge] semantic bundle:\n');
   console.log(JSON.stringify(bundle, null, 2));
 }
 
@@ -44,12 +44,18 @@ function readSemanticBundle(): any {
   const semanticPath = path.join(process.cwd(), '.forge', 'semantic', 'semantic.json');
   
   if (!fs.existsSync(semanticPath)) {
-    console.error('[forge] error: semantic bundle not found.');
+    console.error('[forge] semantic bundle not found');
+    console.error('[forge] run "forge build web" first');
     process.exit(1);
   }
   
-  const content = fs.readFileSync(semanticPath, 'utf-8');
-  return JSON.parse(content);
+  try {
+    const content = fs.readFileSync(semanticPath, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('[forge] failed to read semantic bundle:', (error as Error).message);
+    process.exit(1);
+  }
 }
 
 /**

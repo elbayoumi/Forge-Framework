@@ -11,15 +11,31 @@ import { inspect } from './commands/inspect';
 const args = process.argv.slice(2);
 const command = args[0];
 
+function showHelp(): void {
+  console.log('[forge] Usage: forge <command> [options]');
+  console.log('');
+  console.log('Commands:');
+  console.log('  init                    Create forge.config.json');
+  console.log('  build [target]          Build project (web, android, or both)');
+  console.log('  inspect <target>        Inspect semantic bundle (ui, semantic)');
+  console.log('');
+  console.log('Examples:');
+  console.log('  forge build             Build web and android');
+  console.log('  forge build web         Build web semantic bundle');
+  console.log('  forge build android     Build android native project');
+  console.log('  forge inspect ui        Inspect UI tree');
+  console.log('  forge inspect semantic  Inspect full semantic bundle');
+}
+
 switch (command) {
   case 'init':
     init();
     break;
   
   case 'build':
-    const target = args[1]; // undefined if no target specified
+    const target = args[1];
     build(target).catch((error) => {
-      console.error('[forge] Fatal error:', error.message);
+      console.error('[forge] fatal error:', error.message);
       process.exit(1);
     });
     break;
@@ -29,11 +45,18 @@ switch (command) {
     inspect(inspectTarget);
     break;
   
+  case 'help':
+  case '--help':
+  case '-h':
+    showHelp();
+    break;
+  
   default:
-    console.log('Usage: forge <command>');
-    console.log('Commands:');
-    console.log('  init       Create forge.config.json');
-    console.log('  build      Build project');
-    console.log('  inspect    Inspect project');
+    if (command) {
+      console.error(`[forge] unknown command: ${command}`);
+    } else {
+      console.error('[forge] no command specified');
+    }
+    console.error('[forge] run "forge help" for usage information');
     process.exit(1);
 }

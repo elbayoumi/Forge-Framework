@@ -15,8 +15,8 @@ export async function build(target?: string): Promise<void> {
   } else if (target === 'android') {
     await buildAndroid();
   } else {
-    console.error(`[forge] Unknown build target: ${target}`);
-    console.error('[forge] Available targets: web, android');
+    console.error(`[forge] unknown build target: ${target}`);
+    console.error('[forge] available targets: web, android');
     process.exit(1);
   }
 }
@@ -25,6 +25,8 @@ export async function build(target?: string): Promise<void> {
  * Build web semantic bundle
  */
 async function buildWeb(): Promise<void> {
+  console.log('[forge] starting web semantic build');
+  
   try {
     // Dynamic import to avoid bundling issues
     const { runWebSemanticBuild } = await import('forge-web-builder');
@@ -45,16 +47,19 @@ async function buildAndroid(): Promise<void> {
   
   // Check if semantic.json exists
   if (!fs.existsSync(semanticPath)) {
-    console.error('[forge] error: semantic bundle not found. Run \'forge build web\' first.');
+    console.error('[forge] semantic bundle not found');
+    console.error('[forge] run "forge build web" first');
     process.exit(1);
   }
+  
+  console.log('[forge] starting android native build');
   
   try {
     // Dynamic import to avoid bundling issues
     const { generateAndroidProject } = await import('forge-native-android');
     
     generateAndroidProject(process.cwd());
-    console.log('[forge] android build completed');
+    console.log('[forge] android native build completed');
   } catch (error) {
     console.error('[forge] android build failed:', (error as Error).message);
     process.exit(1);
