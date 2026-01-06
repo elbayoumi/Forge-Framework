@@ -10,13 +10,16 @@ export async function build(target?: string): Promise<void> {
     // Unified build: web first, then android
     await buildWeb();
     await buildAndroid();
+    await buildiOS();
   } else if (target === 'web') {
     await buildWeb();
   } else if (target === 'android') {
     await buildAndroid();
+  } else if (target === 'ios') {
+    await buildiOS();
   } else {
     console.error(`[forge] unknown build target: ${target}`);
-    console.error('[forge] available targets: web, android');
+    console.error('[forge] available targets: web, android, ios');
     process.exit(1);
   }
 }
@@ -62,6 +65,33 @@ async function buildAndroid(): Promise<void> {
     console.log('[forge] android native build completed');
   } catch (error) {
     console.error('[forge] android build failed:', (error as Error).message);
+    process.exit(1);
+  }
+}
+
+/**
+ * Build iOS native project
+ */
+async function buildiOS(): Promise<void> {
+  const semanticPath = path.join(process.cwd(), '.forge', 'semantic', 'semantic.json');
+  
+  // Check if semantic.json exists
+  if (!fs.existsSync(semanticPath)) {
+    console.error('[forge] semantic bundle not found');
+    console.error('[forge] run "forge build web" first');
+    process.exit(1);
+  }
+  
+  console.log('[forge] starting ios native build');
+  
+  try {
+    // Dynamic import to avoid bundling issues
+    const { generateiOSProject } = await import('forge-native-ios');
+    
+    await generateiOSProject(process.cwd());
+    console.log('[forge] ios native build completed');
+  } catch (error) {
+    console.error('[forge] ios build failed:', (error as Error).message);
     process.exit(1);
   }
 }

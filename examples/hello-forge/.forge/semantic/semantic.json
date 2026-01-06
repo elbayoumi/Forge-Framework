@@ -1,65 +1,19 @@
 {
-  "ui": {
-    "components": [
-      {
-        "id": "component_0",
-        "type": "ui",
-        "props": {},
-        "children": [
-          {
-            "id": "component_1",
-            "type": "column",
-            "props": {},
-            "children": [
-              {
-                "id": "component_2",
-                "type": "text",
-                "props": {
-                  "content": "Hello Forge"
-                }
-              },
-              {
-                "id": "component_3",
-                "type": "button",
-                "props": {
-                  "label": "Click Me",
-                  "action": "handleClick"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "layout": {
-      "type": "stack"
+  "type": "ui",
+  "children": [
+    {
+      "type": "column",
+      "children": [
+        {
+          "type": "text",
+          "content": "Integration Test"
+        },
+        {
+          "type": "button",
+          "label": "Build iOS",
+          "action": "test"
+        }
+      ]
     }
-  },
-  "state": {
-    "entities": [],
-    "relationships": []
-  },
-  "action": {
-    "actions": [],
-    "flows": []
-  },
-  "design": {
-    "theme": {
-      "name": "",
-      "colors": {},
-      "typography": {
-        "fontFamily": "",
-        "fontSize": {},
-        "fontWeight": {},
-        "lineHeight": {}
-      },
-      "spacing": {}
-    },
-    "tokens": {
-      "colors": {},
-      "spacing": {},
-      "borderRadius": {},
-      "shadows": {}
-    }
-  }
+  ]
 }

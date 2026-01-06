@@ -1,0 +1,7 @@
+[forge-native-ios] Starting compilation...
+[Error: ENOENT: no such file or directory, open '/Volumes/main/new/projects/Forge Framework/forge-native-ios/dist/templates/ForgeApp.swift.tpl'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Volumes/main/new/projects/Forge Framework/forge-native-ios/dist/templates/ForgeApp.swift.tpl'
+}

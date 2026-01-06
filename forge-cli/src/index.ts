@@ -16,13 +16,14 @@ function showHelp(): void {
   console.log('');
   console.log('Commands:');
   console.log('  init                    Create forge.config.json');
-  console.log('  build [target]          Build project (web, android, or both)');
+  console.log('  build [target]          Build project (web, android, ios, or all)');
   console.log('  inspect <target>        Inspect semantic bundle (ui, semantic)');
   console.log('');
   console.log('Examples:');
-  console.log('  forge build             Build web and android');
+  console.log('  forge build             Build web, android, and ios');
   console.log('  forge build web         Build web semantic bundle');
   console.log('  forge build android     Build android native project');
+  console.log('  forge build ios         Build ios native project');
   console.log('  forge inspect ui        Inspect UI tree');
   console.log('  forge inspect semantic  Inspect full semantic bundle');
 }

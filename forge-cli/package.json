@@ -18,7 +18,8 @@
     "license": "MIT",
     "dependencies": {
         "forge-web-builder": "file:../forge-web-builder",
-        "forge-native-android": "file:../forge-native-android"
+        "forge-native-android": "file:../forge-native-android",
+        "forge-native-ios": "file:../forge-native-ios"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

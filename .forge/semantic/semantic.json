@@ -1,0 +1,19 @@
+{
+  "type": "ui",
+  "children": [
+    {
+      "type": "column",
+      "children": [
+        {
+          "type": "text",
+          "content": "Hello iOS"
+        },
+        {
+          "type": "button",
+          "label": "Press Me",
+          "action": "testAction"
+        }
+      ]
+    }
+  ]
+}

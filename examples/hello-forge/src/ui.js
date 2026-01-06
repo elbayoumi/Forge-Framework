@@ -1,6 +1,6 @@
 ui(
-    column(
-        text("Hello Forge"),
-        button("Click Me", handleClick)
-    )
+  column(
+    text("Hello Forge"),
+    button("Click Me", handleClick)
+  )
 );
