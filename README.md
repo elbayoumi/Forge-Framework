@@ -4,55 +4,152 @@ A semantic compiler that transforms JavaScript UI declarations into native appli
 
 ## What is Forge?
 
-Forge is a multi-stage compiler that performs semantic analysis on JavaScript UI code and generates native applications. It does not execute JavaScript at runtime, use WebViews, or employ cross-platform bridges. Instead, it extracts semantic intent from UI declarations and generates native code that implements that intent.
+Forge is a **compiler**, not a framework or runtime.
 
-The compilation process:
+It parses JavaScript UI declarations, extracts semantic intent, and generates native code. The JavaScript you write is **never executed**—it is analyzed at build time to understand what UI you want, then discarded. The output is pure native code.
 
-1. Parse JavaScript UI declarations into an abstract syntax tree
-2. Extract semantic meaning (what components represent, not how they execute)
-3. Generate a semantic bundle (intermediate representation)
-4. Produce native code from the semantic bundle
+**Critical distinction:** Forge does not run JavaScript. It reads JavaScript as a declarative DSL (domain-specific language) to understand UI structure, then generates equivalent native code. The generated application contains zero JavaScript.
 
-The output is indistinguishable from hand-written native applications.
-
-## Why Forge Exists
-
-**Runtime JavaScript is problematic:**
-
-JavaScript engines add megabytes to application size, consume memory, and introduce performance overhead. Even with JIT compilation, JavaScript execution is slower than native code for UI rendering. Runtime engines also create security attack surfaces through dynamic evaluation capabilities.
-
-**WebViews are not native:**
-
-WebView-based solutions render HTML/CSS, not native UI components. This results in non-native appearance, accessibility problems, and performance issues. WebViews cannot access platform APIs without bridges.
-
-**Cross-platform bridges add complexity:**
-
-Solutions that bridge JavaScript to native code require maintaining synchronization between two execution environments. This creates debugging complexity, performance bottlenecks at the bridge boundary, and version compatibility problems.
-
-**Compile-time semantic compilation is different:**
-
-Forge analyzes UI intent at build time and generates native code. There is no JavaScript runtime, no WebView, and no bridge. The generated application is pure native code that uses platform-standard UI frameworks (Jetpack Compose for Android).
-
-## How Forge Works
-
-**Pipeline:**
+### Compilation Pipeline
 
 ```
 JavaScript UI → AST Parser → Semantic Analyzer → Semantic Bundle → Native Code Generator → Native Project
 ```
 
-**Deterministic builds:**
+1. **Parse:** JavaScript UI declarations are parsed into an abstract syntax tree
+2. **Analyze:** Semantic meaning is extracted (what components represent, not how they execute)
+3. **Bundle:** A semantic bundle (intermediate representation) is generated
+4. **Generate:** Native code is produced from the semantic bundle
 
-Identical input produces identical output. No timestamps, random values, or system-dependent data appear in generated code. Builds are reproducible across machines and time.
+The output is indistinguishable from hand-written native applications.
 
-**Inspectable artifacts:**
+## What Forge Is NOT
 
-Every stage produces explicit artifacts:
+**Forge is NOT a JavaScript framework:**
 
-- `.forge/semantic/semantic.json` - Semantic bundle (human-readable JSON)
-- `.forge/native/android/` - Generated Android project (standard Gradle)
+- Not React, Vue, Angular, or similar
+- Does not use virtual DOM, reconciliation, or component lifecycle
+- JavaScript is a compile-time DSL only, not runtime code
 
-All artifacts can be inspected, modified, and re-compiled. There are no hidden transformations.
+**Forge is NOT a runtime engine:**
+
+- No JavaScript engine ships with your app
+- No V8, JavaScriptCore, or Hermes
+- No dynamic code execution on device
+
+**Forge is NOT a cross-platform framework:**
+
+- Not React Native (no Metro bundler, no bridge)
+- Not Flutter (no Dart, no custom rendering engine)
+- Not Ionic/Capacitor (no WebView)
+
+**Forge is NOT a WebView wrapper:**
+
+- Does not render HTML/CSS
+- Does not use Cordova, Capacitor, or similar
+- No web-to-native bridge
+
+**Forge is NOT a bundler:**
+
+- Not Webpack, Vite, Rollup, or esbuild
+- Does not bundle JavaScript for runtime execution
+- Generates native code, not JavaScript bundles
+
+**Forge IS a compiler:**
+
+- Transforms source code at build time
+- Produces native applications
+- No runtime dependencies beyond platform SDKs
+
+## Why Forge Exists
+
+**Problem:** Runtime JavaScript engines add megabytes to app size, consume memory, and introduce performance overhead. WebViews render HTML/CSS instead of native UI. Cross-platform bridges create synchronization complexity and debugging difficulties.
+
+**Solution:** Compile-time semantic analysis. Forge analyzes UI intent at build time and generates native code. No JavaScript runtime, no WebView, no bridge. The generated application is pure native code using platform-standard UI frameworks (Jetpack Compose for Android).
+
+## DSL Limitations (Important)
+
+The JavaScript you write for Forge is **not normal JavaScript**. It is a restricted declarative DSL.
+
+**Allowed:**
+
+```javascript
+ui(column(text("Hello"), button("Click", handleClick)));
+```
+
+**NOT allowed:**
+
+```javascript
+// No arrays
+const items = [1, 2, 3];
+
+// No JSX
+<Column><Text>Hello</Text></Column>
+
+// No variables
+const greeting = "Hello";
+ui(text(greeting));
+
+// No loops
+for (let i = 0; i < 10; i++) { ... }
+
+// No conditionals
+if (condition) { ... }
+
+// No functions
+function MyComponent() { ... }
+```
+
+**Why these restrictions?**
+
+Forge performs **static semantic analysis**. It must understand UI structure at compile time without executing code. Variables, loops, and conditionals require runtime execution, which Forge explicitly does not do.
+
+These are v0.1 limitations. Future versions will support conditional rendering and list rendering through semantic primitives (not runtime JavaScript execution).
+
+## Current Scope (v0.1)
+
+**Platform support:**
+
+- ✅ Android (Jetpack Compose)
+- ❌ iOS (not yet implemented)
+- ❌ Web (not yet implemented)
+- ❌ Desktop (not yet implemented)
+
+**UI components:**
+
+- ✅ `text()` - Display text
+- ✅ `button()` - Clickable button
+- ✅ `column()` - Vertical layout
+- ✅ `row()` - Horizontal layout
+- ❌ Everything else (images, inputs, lists, custom components)
+
+**Features NOT supported:**
+
+- Navigation between screens
+- State management
+- User input (text fields, forms)
+- Styling or theming
+- Animations
+- Network requests
+- Conditional rendering
+- Dynamic lists
+- Data binding
+- Props or component composition
+
+**What you CAN build in v0.1:**
+
+- Static UI layouts with text and buttons
+- Proof-of-concept applications
+- Compiler pipeline demonstrations
+
+**What you CANNOT build in v0.1:**
+
+- Real applications
+- Anything with user input beyond button clicks
+- Anything with dynamic content
+- Anything with navigation
+
+v0.1 is a **compiler architecture demonstration**, not a production-ready framework.
 
 ## Quick Start (5 Minutes)
 
@@ -109,6 +206,10 @@ fun MainScreen() {
 
 ## CLI Commands
 
+**forge build**
+
+Runs web build, then android build (if web succeeds).
+
 **forge build web**
 
 Parses `src/ui.js` and generates semantic bundle at `.forge/semantic/semantic.json`.
@@ -126,87 +227,68 @@ Displays UI component tree from semantic bundle.
 Example output:
 
 ```
-UI Tree:
+[forge] UI tree:
 
-column
-  text {"content":"Hello Forge"}
-  button {"label":"Click Me","action":"handleClick"}
+ui
+  column
+    text {"content":"Hello Forge"}
+    button {"label":"Click Me","action":"handleClick"}
 ```
 
 **forge inspect semantic**
 
 Displays complete semantic bundle as formatted JSON.
 
+**forge help**
+
+Shows usage information and examples.
+
 ## Inspector
 
-The inspector provides read-only access to semantic artifacts. This serves two purposes:
+The inspector provides read-only access to semantic artifacts.
 
-**Trust:** Developers can verify what Forge generates. No hidden transformations occur. The semantic bundle is the complete intermediate representation.
+**Purpose:**
 
-**Debugging:** When generated code behaves unexpectedly, developers can inspect the semantic bundle to determine if the issue is in parsing (web builder) or code generation (native compiler).
+- **Trust:** Verify what Forge generates. No hidden transformations.
+- **Debugging:** Determine if issues are in parsing (web builder) or code generation (native compiler).
 
 Inspector commands never modify files. They are pure read operations.
 
-## What Forge Is NOT
+## How Forge Works
 
-Forge is explicitly not:
+**Deterministic builds:**
 
-- A JavaScript framework (React, Vue, Angular)
-- A runtime engine (no JavaScript executes on device)
-- A cross-platform framework (React Native, Flutter, Ionic)
-- A WebView wrapper (Cordova, Capacitor)
-- A bundler or build tool (Webpack, Vite)
-- A UI component library
+Identical input produces identical output. No timestamps, random values, or system-dependent data appear in generated code. Builds are reproducible across machines and time.
 
-Forge is a compiler. It transforms source code at build time and produces native applications.
+**Inspectable artifacts:**
 
-## Current Limitations (v0.1)
+Every stage produces explicit artifacts:
 
-**Platform support:**
+- `.forge/semantic/semantic.json` - Semantic bundle (human-readable JSON)
+- `.forge/native/android/` - Generated Android project (standard Gradle)
 
-- Android only (Jetpack Compose)
-- iOS, Web, Desktop not yet supported
+All artifacts can be inspected, modified, and re-compiled. There are no hidden transformations.
 
-**UI components:**
+**No runtime dependencies:**
 
-- Four components only: text, button, column, row
-- No images, inputs, lists, or custom components
+Generated applications use only platform-standard SDKs. No Forge-specific libraries are required at runtime.
 
-**Features not supported:**
-
-- Navigation between screens
-- State management
-- User input handling (beyond button clicks)
-- Styling or theming
-- Animations
-- Network requests
-- Conditional rendering
-- Dynamic lists
-
-**Semantic model:**
-
-- Static UI declarations only
-- No runtime behavior modeling
-- No data binding
-
-These are current implementation limitations, not fundamental constraints. The architecture supports these features in future versions.
-
-## Roadmap (High-Level)
+## Roadmap
 
 **v0.2 (Next):**
 
-- Conditional rendering support
-- List rendering
-- Basic state management primitives
+- Conditional rendering (semantic primitives, not runtime JS)
+- List rendering (semantic primitives, not runtime JS)
+- Basic state management
 - Navigation between screens
 
 **Future:**
 
 - iOS compiler (SwiftUI code generation)
-- Expanded semantic model (actions, effects)
 - Web compiler (framework-agnostic output)
 - Desktop compilers (Qt, native)
-- Enhanced inspector (semantic validation, visualization)
+- Expanded semantic model (actions, effects)
+- Enhanced inspector (validation, visualization)
 
 ## Technical Details
 
@@ -235,6 +317,36 @@ Forge is architecture-first. Contributions must maintain:
 2. Compile-time guarantees (no runtime execution)
 3. Inspectable artifacts (no hidden transformations)
 4. Test coverage for all code paths
+
+## Frequently Asked Questions
+
+**Q: Why not just use React Native?**
+
+A: React Native runs JavaScript at runtime and uses a bridge to communicate with native code. Forge generates native code at build time. No JavaScript runtime, no bridge, no synchronization overhead.
+
+**Q: Why not just use Flutter?**
+
+A: Flutter uses a custom rendering engine and Dart runtime. Forge generates platform-standard native code (Jetpack Compose, SwiftUI). No custom runtime, no framework-specific rendering.
+
+**Q: Can I use npm packages?**
+
+A: No. Forge does not execute JavaScript. npm packages are runtime libraries. Forge only reads JavaScript as a declarative DSL.
+
+**Q: Can I write normal JavaScript functions?**
+
+A: No. Forge performs static semantic analysis. It does not execute code. The JavaScript you write is a restricted DSL, not executable code.
+
+**Q: When will this be production-ready?**
+
+A: Not soon. v0.1 is a compiler architecture demonstration. Production readiness requires expanded semantic models, more platforms, comprehensive component libraries, and extensive testing.
+
+**Q: Why use JavaScript if it's not executed?**
+
+A: Familiarity. Developers know JavaScript syntax. Using JavaScript as a compile-time DSL lowers the learning curve compared to inventing a new syntax.
+
+**Q: Is this better than native development?**
+
+A: No. v0.1 is far worse than native development. The value proposition is compile-time semantic analysis enabling future cross-platform code generation without runtime overhead. This is a long-term architectural bet, not a current productivity win.
 
 ## License
 
